@@ -326,7 +326,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   PlayerCanAttack: 0
-  SceneID: 0
+  SceneID: 1
   PlayerList: 
 --- !u!1 &705507993
 GameObject:
@@ -823,7 +823,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c773162c6d671cc47bc39c6b98b3e7b7, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  CurrentSceneController: {fileID: 0}
   ServerIP: 127.0.0.1
   ServerPort: 8899
   PlayerID: 0
