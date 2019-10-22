@@ -6,6 +6,7 @@ using UnityEngine;
 using System.IO;
 public class PlayerController : MonoBehaviour
 {
+    private static int BoltId = 1;
     public Animator playerAnimator; // 角色骨骼动画
     public GameObject bolt;
     public float boltSpeed = 1f;
@@ -20,12 +21,11 @@ public class PlayerController : MonoBehaviour
     private float _lastSyncPositionTimeSpec=0f;
     private Vector4 _lastSyncPosition = Vector4.zero;
     //是否已经获取出生点位置,0表示未获取,1表示已经获取但是未同步到模型上,2表示已经同步到模型上
-    private int _initPosState = 0;
+    private int _initPosState = 0 ;
     //四元组存储 玩家的xyz坐标以及面向的角度
     private Vector4 InitPos;
 
     private bool canAttack = true;
-
 
     private float m_LastMouseX;
     private int _pid=0;
@@ -39,6 +39,20 @@ public class PlayerController : MonoBehaviour
         {
             _pid = value;
             Debug.Log("Get New Pid :" + _pid);
+        }
+    }
+    private bool _hpChanged = false;
+    private int _hp = 0;
+    public int HP
+    {
+        get
+        {
+            return _hp;
+        }
+        set
+        {
+            _hp = value;
+            _hpChanged = true;
         }
     }
     private string _playerName;
@@ -96,12 +110,21 @@ public class PlayerController : MonoBehaviour
         SkillTrigger fire = new SkillTrigger();
         fire.Pid = this.Pid;
         fire.SkillId = 1;
-        fire.P.X = bulletObj.transform.position.x;
-        fire.P.Y = bulletObj.transform.position.y;
-        fire.P.Z = bulletObj.transform.position.z;
-        fire.P.V = bulletObj.transform.localEulerAngles.y;
-        //fire.
+        Position p = new Position();
+        fire.BulletId = BoltId++;
+        p.X = bulletObj.transform.position.x;
+        p.Y = bulletObj.transform.position.y;
+        p.Z = bulletObj.transform.position.z;
+        p.V = bulletObj.transform.localEulerAngles.y;
 
+        Velocity v = new Velocity();
+
+        v.X = rgbody.velocity.x;
+        v.Y = rgbody.velocity.y;
+        v.Z = rgbody.velocity.z;
+        fire.P = p;
+        fire.V = v;
+        NetManager.Instance.SendMessage(NetManager.Protocol.GAME_MSG_SKILL_FIRE,fire);
     }
     // Start is called before the first frame update
     void Start()
@@ -126,6 +149,8 @@ public class PlayerController : MonoBehaviour
         {
             this.InitPos = new Vector4(obj.P.X, obj.P.Y, obj.P.Z, obj.P.V);
             _initPosState = 1;
+            this.HP = obj.P.BloodValue;
+            Debug.Log("Get HP:" + obj.P.BloodValue);
         }
     }
 
@@ -149,6 +174,20 @@ public class PlayerController : MonoBehaviour
             if(uiController!=null)
             {
                 uiController.textName.text = _playerName;
+                _playerNameChanged = false;
+            }
+            else
+            {
+                Debug.Log("UiController is null");
+            }
+        }
+        if(_hpChanged)
+        {
+            _hpChanged = false;
+            var uiController = GetComponent<PlayerInformationUIController>();
+            if (uiController != null)
+            {
+                uiController.hpBar.value = this._hp/1000f;
                 _playerNameChanged = false;
             }
             else
@@ -205,6 +244,7 @@ public class PlayerController : MonoBehaviour
         pos.Y = this.transform.position.y;
         pos.Z = this.transform.position.z;
         pos.V = this.transform.localEulerAngles.y; //当前玩家的面朝方向应该获取欧拉角度的y轴旋转角度
+        pos.BloodValue = this.HP;
         NetManager.Instance.SendMessage(3,pos);
     }
     private void OnDestroy()

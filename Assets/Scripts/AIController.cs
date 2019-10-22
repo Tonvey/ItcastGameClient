@@ -12,6 +12,9 @@ public class AIController : MonoBehaviour
     private CharacterController aiCharaterController;
     private string _playerName;
     private bool _playerNameChanged = false;
+    private Animator animator;
+    public GameObject bolt;
+    public float boltSpeed = 1f;
     public string PlayerName
     {
         get
@@ -52,8 +55,11 @@ public class AIController : MonoBehaviour
     {
         NetManager.OnMove += OnMove;//监听玩家移动的事件 
         NetManager.OnOver += OnOver;//监听玩家离线的事件
+        NetManager.OnSkillTrigger += OnSkillTrigger;
         aiCharaterController = this.GetComponent<CharacterController>();
+        animator = this.GetComponent<Animator>();
     }
+
 
     public event Action<int> OnUserDestroy;
 
@@ -64,6 +70,21 @@ public class AIController : MonoBehaviour
         {
             bOver = true;
         }
+    }
+    private void OnSkillTrigger(SkillTrigger trigger)
+    {
+        if(trigger.Pid!=this.Pid)
+        {
+            return;
+		}
+        this.animator.SetTrigger("Attack");
+        Vector3 pos = this.transform.position + this.transform.up + this.transform.forward*3.5f;
+        var bulletObj = Instantiate(bolt, pos, this.bolt.transform.rotation);
+        bulletObj.transform.rotation = Quaternion.AngleAxis(90, this.transform.right) * this.transform.rotation;
+        var bc = bulletObj.GetComponent<BoltContoller>();
+        bc.BornPos = pos;
+        var rgbody = bulletObj.GetComponent<Rigidbody>();
+        rgbody.velocity = this.transform.forward * this.boltSpeed;
     }
 
     private void OnMove(BroadCast bc)

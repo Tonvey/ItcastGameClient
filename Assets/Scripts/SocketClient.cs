@@ -6,6 +6,7 @@ using System.Net.Sockets;
 using System.IO;
 using Pb;
 using Google.Protobuf;
+using System.Threading;
 
 
 //主要处理Socket io的类
@@ -23,6 +24,18 @@ public class SocketClient
     private byte[] readBuff = new byte[MAX_READ];
     //是否连接服务器成功的标志位
     public static bool loggedIn = false;
+    private bool _pause = false;
+    public bool Pause
+    {
+        set
+        {
+            _pause = value;
+        }
+        get
+        {
+            return _pause;
+        }
+    }
 
     private string mIp;
     private int mPort;
@@ -167,6 +180,12 @@ public class SocketClient
             Array.Resize<byte>(ref lastbuff, lastbuff.Length + readCount);
             Array.ConstrainedCopy(readBuff, 0, lastbuff, copyPos, readCount);
         }
+        string strBuff = "";
+        foreach ( var c in lastbuff)
+        {
+            strBuff+= c.ToString("X2")+" ";
+        }
+        Debug.Log("Receiv data:" + strBuff);
 
         OnReceivedData(lastbuff);
 
@@ -177,6 +196,11 @@ public class SocketClient
         //根据协议来进行判断
         while(lastbuff!=null&&lastbuff.Length>=8)
         {
+            while(_pause)
+            {
+                Debug.Log("SockClient Pause and sleep");
+                Thread.Sleep(1);
+            }
             //前4个字节是主体数据的长度
             int packetLen = ReadInt32(lastbuff, 0);
             //中间4个字节是消息的id

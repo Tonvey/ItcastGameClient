@@ -823,11 +823,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c773162c6d671cc47bc39c6b98b3e7b7, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  ServerIP: 127.0.0.1
+  ServerIP: 49.232.136.126
   ServerPort: 8899
   PlayerID: 0
   PlayerName: 
-  ChangeScene: 0
   ParseCMD: 0
 --- !u!1 &1447061607
 GameObject:
@@ -1476,7 +1475,7 @@ MeshRenderer:
   m_GameObject: {fileID: 2136460787}
   m_Enabled: 1
   m_CastShadows: 1
-  m_ReceiveShadows: 1
+  m_ReceiveShadows: 0
   m_DynamicOccludee: 1
   m_MotionVectors: 1
   m_LightProbeUsage: 1
@@ -1521,7 +1520,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2136460787}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 150, y: 0.57, z: 150}
+  m_LocalPosition: {x: 120, y: 0.57, z: 120}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 0}

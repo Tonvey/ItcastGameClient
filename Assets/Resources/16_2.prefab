@@ -182,6 +182,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   speed: 2
   Pid: 0
+  bolt: {fileID: 2323615197467802610, guid: 41de0158558534aee91ca20ead97cbd2, type: 3}
+  boltSpeed: 1
 --- !u!114 &5098634978475204205
 MonoBehaviour:
   m_ObjectHideFlags: 0

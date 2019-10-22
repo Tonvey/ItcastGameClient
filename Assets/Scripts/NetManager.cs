@@ -40,6 +40,7 @@ public class NetManager : MonoBehaviour
     //bloodvalue
     public static Action<int> OnBlood;
     public static Action<ChangeWorldResponse> OnChangeWorldResponse;
+    public static Action<SkillTrigger> OnSkillTrigger;
     public static NetManager Instance
     {
         private set;
@@ -92,6 +93,7 @@ public class NetManager : MonoBehaviour
     private void NetLogic(int messageId, byte[] packetData)
     {
         Protocol protocolId = (Protocol)messageId;
+        Debug.Log("New Message : " + messageId);
         switch (protocolId)
         {
             case Protocol.GAME_MSG_LOGON_SYNCPID://syncpid 玩家出生同步pid和姓名
@@ -177,9 +179,19 @@ public class NetManager : MonoBehaviour
             case Protocol.GAME_MSG_CHANGE_WORLD_R:
                 {
                     var res = ChangeWorldResponse.Parser.ParseFrom(packetData);
+                    Debug.Log("ChangWorld response : " + res.ChangeRes);
                     if(OnChangeWorldResponse!=null)
                     {
                         OnChangeWorldResponse(res);
+                    }
+                    break;
+                }
+            case Protocol.GAME_MSG_SKILL_BROAD:
+                {
+                    var res = SkillTrigger.Parser.ParseFrom(packetData);
+                    if(OnChangeWorldResponse!=null)
+                    {
+                        OnSkillTrigger(res);
                     }
                     break;
                 }
