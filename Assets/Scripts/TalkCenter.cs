@@ -32,7 +32,6 @@ public class TalkCenter : MonoBehaviour
     // Use this for initialization
     void Start()
     {
-        netMgr = GameObject.Find("GameController").GetComponent<NetManager>();
 
     }
 

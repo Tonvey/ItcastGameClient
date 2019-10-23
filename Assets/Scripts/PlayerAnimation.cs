@@ -33,12 +33,12 @@ public class PlayerAnimation : MonoBehaviour
         if (Mathf.Abs(speed) <= 0.1f && Mathf.Abs(direction) >= 0.9f)
             speed = 1f;
         //修正一下1,3, 7,9 方向碎步
-        if (speed < 0 && speed > -0.9f && direction > 0.2f)
+        if (speed < 0 && speed > -0.8f && direction > 0.2f)
         {
             speed = -1f;
             direction = 1f;
         }
-        if (speed < 0 && speed > -0.9f && direction < -0.2f)
+        if (speed < 0 && speed > -0.8f && direction < -0.2f)
         {
             speed = -1f;
             direction = -1f;

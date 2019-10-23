@@ -22,6 +22,7 @@ public class SocketClient
     private const int MAX_READ = 8192;
     //数组，用来存储传输的信息
     private byte[] readBuff = new byte[MAX_READ];
+    public bool LogIO = true;
     //是否连接服务器成功的标志位
     public static bool loggedIn = false;
     private bool _pause = false;
@@ -106,6 +107,15 @@ public class SocketClient
         //数据的发送
         if (client.Connected)
         {
+            if (LogIO)
+            {
+                string strBuff = "";
+                foreach (var c in sendData)
+                {
+                    strBuff += c.ToString("X2") + " ";
+                }
+                Debug.Log("Send data:" + strBuff);
+            }
             this.client.GetStream().BeginWrite(sendData, 0, sendData.Length, new AsyncCallback(OnWrite), sendData);
         }
         else
@@ -116,8 +126,15 @@ public class SocketClient
 
     private void OnWrite(IAsyncResult ar)
     {
-        //写完数据之后
-        this.client.GetStream().EndWrite(ar);
+        try
+        {
+            //写完数据之后
+            this.client.GetStream().EndWrite(ar);
+        }
+        catch(Exception e)
+        {
+            Debug.LogError(e);
+        }
     }
 
     private void Close()
@@ -161,33 +178,43 @@ public class SocketClient
 
     private void OnRead(IAsyncResult ar)
     {
-        //当有数据可以读取的时候就会回调这个函数,就在这个函数取处理数据 
-        int readCount = client.GetStream().EndRead(ar); //读取到多少个字节,调用了这个函数之后才结束read
-        //获取透传参数,是上次读取数据遗留下来还没有处理的字节数组
-        byte[] lastbuff = (byte[])ar.AsyncState;
-        if(lastbuff==null)
+        try
         {
-            //最后读取到的数据的buff
-            lastbuff = new byte[readCount];
-            //将读取缓冲区里边的数据先拷贝过来
-            Array.Copy(readBuff, lastbuff, readCount);
-        }
-        else
-        {
-            //最后读取到的数据不为null,说明上次处理报文的时候还有数据遗留下来
-            //要跟当前读到的数据进行拼凑,要对原来的buff数组进行扩容
-            int copyPos = lastbuff.Length;
-            Array.Resize<byte>(ref lastbuff, lastbuff.Length + readCount);
-            Array.ConstrainedCopy(readBuff, 0, lastbuff, copyPos, readCount);
-        }
-        string strBuff = "";
-        foreach ( var c in lastbuff)
-        {
-            strBuff+= c.ToString("X2")+" ";
-        }
-        Debug.Log("Receiv data:" + strBuff);
+            //当有数据可以读取的时候就会回调这个函数,就在这个函数取处理数据 
+            int readCount = client.GetStream().EndRead(ar); //读取到多少个字节,调用了这个函数之后才结束read
+                                                            //获取透传参数,是上次读取数据遗留下来还没有处理的字节数组
+            byte[] lastbuff = (byte[])ar.AsyncState;
+            if (lastbuff == null)
+            {
+                //最后读取到的数据的buff
+                lastbuff = new byte[readCount];
+                //将读取缓冲区里边的数据先拷贝过来
+                Array.Copy(readBuff, lastbuff, readCount);
+            }
+            else
+            {
+                //最后读取到的数据不为null,说明上次处理报文的时候还有数据遗留下来
+                //要跟当前读到的数据进行拼凑,要对原来的buff数组进行扩容
+                int copyPos = lastbuff.Length;
+                Array.Resize<byte>(ref lastbuff, lastbuff.Length + readCount);
+                Array.ConstrainedCopy(readBuff, 0, lastbuff, copyPos, readCount);
+            }
+            if (LogIO)
+            {
+                string strBuff = "";
+                foreach (var c in lastbuff)
+                {
+                    strBuff += c.ToString("X2") + " ";
+                }
+                Debug.Log("Receiv data:" + strBuff);
+            }
 
-        OnReceivedData(lastbuff);
+            OnReceivedData(lastbuff);
+        }
+        catch(Exception e)
+        {
+            Debug.LogError(e);
+        }
 
     }
 

@@ -5,7 +5,7 @@ using Pb;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
-public class GameController : MonoBehaviour
+public class GameController
 {
     public string ServerIP = "";
     public ushort ServerPort = 0;
@@ -15,32 +15,39 @@ public class GameController : MonoBehaviour
     private int ChangToSceneInNextFrame = 0;
     public bool ParseCMD = false;
     private CmdHelper mCmdHelper = new CmdHelper();
+    private Action NextFrameAction=null;
+    private Position InitP;
+    private static GameController _instance = null;
+    private bool hasStart = false;
     public static GameController Instance
     {
-        private set;
-        get;
-    }
-
-    private void Awake()
-    {
-        Debug.Log("GameController awake");
-        Instance = this;
+        get
+        {
+            if(_instance==null)
+            {
+                _instance = new GameController();
+            }
+            return _instance;
+        }
     }
 
     // Start is called before the first frame update
-    void Start()
+    public void Start()
     {
-        Debug.Log("GameController start");
-        DontDestroyOnLoad(this.gameObject);
-        NetManager.OnLogon += OnLogon;
-        NetManager.OnChangeWorldResponse += OnChangeWorldResponse;
-        if (ParseCMD)
+        if(!hasStart)
         {
-            mCmdHelper.ParseCMDArgs();
-            this.ServerIP = mCmdHelper.ServerIP;
-            this.ServerPort = ushort.Parse(mCmdHelper.ServerPort);
+            Debug.Log("GameController start");
+            NetManager.OnLogon += OnLogon;
+            NetManager.OnChangeWorldResponse += OnChangeWorldResponse;
+            if (ParseCMD)
+            {
+                mCmdHelper.ParseCMDArgs();
+                this.ServerIP = mCmdHelper.ServerIP;
+                this.ServerPort = ushort.Parse(mCmdHelper.ServerPort);
+            }
+            NetManager.Instance.ConnectToServer(this.ServerIP, this.ServerPort);
+            hasStart = true;
         }
-        NetManager.Instance.ConnectToServer(this.ServerIP, this.ServerPort);
     }
 
 
@@ -64,7 +71,7 @@ public class GameController : MonoBehaviour
         req.TargetId = targetSceneID;
         NetManager.Instance.SendMessage(NetManager.Protocol.GAME_MSG_CHANGE_WORLD,req);
     }
-    private void Update()
+    public void Update()
     {
         if(this.ChangToSceneInNextFrame!=0)
         {
@@ -82,13 +89,32 @@ public class GameController : MonoBehaviour
             var aop = SceneManager.LoadSceneAsync(sceneName);
             aop.completed += (obj) =>
               {
-                  var player = GameObject.Find("16_1");
-                  var pc = player.GetComponent<PlayerController>();
-                  pc.Pid = this.PlayerID;
-                  pc.PlayerName = this.PlayerName;
-                  ChangToSceneInNextFrame = 0;
-                  NetManager.Instance.Client.Pause = false;
+                  this.NextFrameAction = () =>
+                  {
+                      Debug.Log("Scene changed");
+                      var player = GameObject.Find("16_1");
+                      var pc = player.GetComponent<PlayerController>();
+                      pc.Pid = this.PlayerID;
+                      pc.PlayerName = this.PlayerName;
+                      ChangToSceneInNextFrame = 0;
+                      var sc = GameObject.Find("SceneController");
+                      var bsc = sc.GetComponent<BattleSceneController>();
+                      bsc.AddPlayerToList(this.PlayerID);
+                      NetManager.Instance.Client.Pause = false;
+                  };
               };
+        }
+        if(NextFrameAction!=null)
+        {
+            Debug.Log("Run NextFrameAction");
+            NextFrameAction();
+            NextFrameAction = null;
+            BroadCast bc = new BroadCast();
+            bc.P = this.InitP;
+            bc.Pid = this.PlayerID;
+            bc.Username = this.PlayerName;
+            bc.Tp = 2;
+            NetManager.OnMove(bc);
         }
     }
 
@@ -98,9 +124,10 @@ public class GameController : MonoBehaviour
         {
             this.ChangToSceneInNextFrame = res.TargetId;
             NetManager.Instance.Client.Pause = true;
+            this.InitP = res.P;
         }
     }
-    private void OnDestroy()
+    public void OnDestroy()
     {
         NetManager.Instance.Disconnect();
     }

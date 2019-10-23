@@ -776,8 +776,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1439376278}
-  - component: {fileID: 1439376280}
-  - component: {fileID: 1439376279}
+  - component: {fileID: 1439376281}
   m_Layer: 0
   m_Name: GameController
   m_TagString: Untagged
@@ -799,7 +798,7 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 7
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &1439376279
+--- !u!114 &1439376281
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -808,26 +807,11 @@ MonoBehaviour:
   m_GameObject: {fileID: 1439376277}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: c2bdb24e926bb445d80bb6fc474524d1, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
---- !u!114 &1439376280
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1439376277}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: c773162c6d671cc47bc39c6b98b3e7b7, type: 3}
+  m_Script: {fileID: 11500000, guid: 6f6f1eb330bca429db740a2cf1c3ad72, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   ServerIP: 49.232.136.126
   ServerPort: 8899
-  PlayerID: 0
-  PlayerName: 
-  ParseCMD: 0
 --- !u!1 &1447061607
 GameObject:
   m_ObjectHideFlags: 0

@@ -41,30 +41,58 @@ public class AIController : MonoBehaviour
             _newPosChanged = true;
         }
     }
+    private bool _hpChanged = false;
+    private int _hp = 0;
+    public int HP
+    {
+        get
+        {
+            return _hp;
+        }
+        set
+        {
+            _hp = value;
+            _hpChanged = true;
+        }
+    }
     //是否要干掉当前对象的布尔值
     private bool bOver = false;
-    internal void InitPlayer(int pid, string username, float x, float y, float z, float v)
+    internal void InitPlayer(int pid, string username, float x, float y, float z, float v,int hp)
     {
+        Debug.Log("AiController init");
         this.Pid = pid;
         this.PlayerName = username;
         this.transform.position = new Vector3(x, y, z);
         this.transform.rotation = Quaternion.Euler(0,v,0);
+        this.HP = hp;
     }
+    private SkillTrigger trigger = null;
     // Start is called before the first frame update
     void Start()
     {
+        Debug.Log("AiController start");
         NetManager.OnMove += OnMove;//监听玩家移动的事件 
         NetManager.OnOver += OnOver;//监听玩家离线的事件
         NetManager.OnSkillTrigger += OnSkillTrigger;
+        NetManager.OnSkillContact += OnSkillContact;
         aiCharaterController = this.GetComponent<CharacterController>();
         animator = this.GetComponent<Animator>();
     }
 
+    private void OnSkillContact(SkillContact contact)
+    {
+        if(contact.TargetPid == this.Pid)
+        {
+            Debug.LogFormat("AI:{0} be hit , hp : {1}", this.Pid, contact.ContactPos.BloodValue);
+            this.HP = contact.ContactPos.BloodValue;
+        }
+    }
 
     public event Action<int> OnUserDestroy;
 
     private void OnOver(int _pid)
     {
+        Debug.Log("AiController OnOver");
         //回到主ui线程里边去干掉当前对象
         if(this.Pid == _pid)
         {
@@ -77,14 +105,7 @@ public class AIController : MonoBehaviour
         {
             return;
 		}
-        this.animator.SetTrigger("Attack");
-        Vector3 pos = this.transform.position + this.transform.up + this.transform.forward*3.5f;
-        var bulletObj = Instantiate(bolt, pos, this.bolt.transform.rotation);
-        bulletObj.transform.rotation = Quaternion.AngleAxis(90, this.transform.right) * this.transform.rotation;
-        var bc = bulletObj.GetComponent<BoltContoller>();
-        bc.BornPos = pos;
-        var rgbody = bulletObj.GetComponent<Rigidbody>();
-        rgbody.velocity = this.transform.forward * this.boltSpeed;
+        this.trigger = trigger;
     }
 
     private void OnMove(BroadCast bc)
@@ -93,6 +114,7 @@ public class AIController : MonoBehaviour
         {
             //当前玩家在移动
             this.NewPos = new Vector4(bc.P.X, bc.P.Y, bc.P.Z, bc.P.V);
+            this.HP = bc.P.BloodValue;
         }
     }
 
@@ -148,7 +170,37 @@ public class AIController : MonoBehaviour
                 Debug.Log("UiController is null");
             }
         }
-        if(bOver)
+        if (_hpChanged)
+        {
+            _hpChanged = false;
+            var uiController = GetComponent<PlayerInformationUIController>();
+            if (uiController != null)
+            {
+                Debug.Log("Hp :" + this._hp);
+                uiController.hpBar.value = this._hp / 1000f;
+                _playerNameChanged = false;
+            }
+            else
+            {
+                Debug.Log("UiController is null");
+            }
+        }
+        if(trigger!=null)
+        {
+            this.animator.SetTrigger("Attack");
+            Vector3 pos = this.transform.position + this.transform.up + this.transform.forward * 3.5f;
+            var bulletObj = Instantiate(bolt, pos, this.bolt.transform.rotation);
+            bulletObj.transform.rotation = Quaternion.AngleAxis(90, this.transform.right) * this.transform.rotation;
+            var bc = bulletObj.GetComponent<BoltContoller>();
+            bc.BornPos = pos;
+            bc.PlayerId = this.Pid;
+            bc.BulletId = trigger.BulletId;
+            bc.SkillId = trigger.SkillId;
+            var rgbody = bulletObj.GetComponent<Rigidbody>();
+            rgbody.velocity = new Vector3(trigger.V.X, trigger.V.Y, trigger.V.Z);
+            trigger = null;
+        }
+        if (bOver)
         {
             //干掉当前玩家
             Destroy(this.gameObject);
@@ -156,6 +208,7 @@ public class AIController : MonoBehaviour
     }
     private void OnDestroy()
     {
+        Debug.Log("AiController OnDestroy");
         if(OnUserDestroy!=null)
             OnUserDestroy(Pid);
     }

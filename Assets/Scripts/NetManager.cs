@@ -4,7 +4,7 @@ using UnityEngine;
 using System;
 using Pb;
 
-public class NetManager : MonoBehaviour
+public class NetManager
 {
     public enum Protocol
     {
@@ -41,10 +41,18 @@ public class NetManager : MonoBehaviour
     public static Action<int> OnBlood;
     public static Action<ChangeWorldResponse> OnChangeWorldResponse;
     public static Action<SkillTrigger> OnSkillTrigger;
+    public static Action<SkillContact> OnSkillContact;
+    private static NetManager _instance;
     public static NetManager Instance
     {
-        private set;
-        get;
+        get
+        {
+            if (_instance == null)
+            {
+                _instance = new NetManager();
+            }
+            return _instance;
+        }
     }
     private SocketClient _client;
     public SocketClient Client
@@ -70,10 +78,9 @@ public class NetManager : MonoBehaviour
 
     private void Awake()
     {
-        Instance = this;
     }
     // Start is called before the first frame update
-    void Start()
+    private NetManager()
     {
         _client = new SocketClient();
         _client.OnNewProtocolMessage += this.NetLogic;
@@ -145,7 +152,11 @@ public class NetManager : MonoBehaviour
             case Protocol.GAME_MSG_LOGOFF_SYNCPID:
                 {
                     SyncPid sync = SyncPid.Parser.ParseFrom(packetData);
-                    NetManager.OnOver(sync.Pid);
+                    if(NetManager.OnOver!=null)
+                    {
+                        Debug.Log("net manager OnOver trigger : " + sync.Pid);
+                        NetManager.OnOver(sync.Pid);
+                    }
                     break;
                 }
             case Protocol.GAME_MSG_SUR_PLAYER:
@@ -192,6 +203,15 @@ public class NetManager : MonoBehaviour
                     if(OnChangeWorldResponse!=null)
                     {
                         OnSkillTrigger(res);
+                    }
+                    break;
+                }
+            case Protocol.GAME_MSG_FIRE_HIT:
+                {
+                    var res = SkillContact.Parser.ParseFrom(packetData);
+                    if (OnSkillContact != null)
+                    {
+                        OnSkillContact(res);
                     }
                     break;
                 }

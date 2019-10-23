@@ -104,6 +104,9 @@ public class PlayerController : MonoBehaviour
         bulletObj.transform.rotation = Quaternion.AngleAxis(90, this.transform.right) * this.transform.rotation;
         var bc = bulletObj.GetComponent<BoltContoller>();
         bc.BornPos = pos;
+        bc.PlayerId = this.Pid;
+        bc.BulletId = BoltId++;
+        bc.SkillId = 1;
         var rgbody = bulletObj.GetComponent<Rigidbody>();
         rgbody.velocity = this.transform.forward * this.boltSpeed;
 
@@ -111,7 +114,7 @@ public class PlayerController : MonoBehaviour
         fire.Pid = this.Pid;
         fire.SkillId = 1;
         Position p = new Position();
-        fire.BulletId = BoltId++;
+        fire.BulletId = bc.BulletId;
         p.X = bulletObj.transform.position.x;
         p.Y = bulletObj.transform.position.y;
         p.Z = bulletObj.transform.position.z;
@@ -132,6 +135,15 @@ public class PlayerController : MonoBehaviour
         //关注NetMgr的一些网络事件
         NetManager.OnLogon += OnLogon;
         NetManager.OnMove += OnMove;
+        NetManager.OnSkillContact += OnSkillContact;
+    }
+
+    private void OnSkillContact(SkillContact contact)
+    {
+        if(contact.TargetPid==this.Pid)
+        {
+            this.HP = contact.ContactPos.BloodValue;
+        }
     }
 
     private void OnLogon(int pid, string userName)
@@ -187,6 +199,7 @@ public class PlayerController : MonoBehaviour
             var uiController = GetComponent<PlayerInformationUIController>();
             if (uiController != null)
             {
+                Debug.Log("Hp :" + this._hp);
                 uiController.hpBar.value = this._hp/1000f;
                 _playerNameChanged = false;
             }
