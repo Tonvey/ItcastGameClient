@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -9,7 +10,12 @@ public class DoorController : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        
+        GameEventManager.TestEvent += OnTest; 
+    }
+
+    private void OnTest()
+    {
+        Debug.Log("OnTest");
     }
 
     // Update is called once per frame
@@ -34,5 +40,14 @@ public class DoorController : MonoBehaviour
     private void OnCollisionExit(Collision collision)
     {
         Debug.Log("Collistion Exit");
+    }
+    private void OnDestroy()
+    {
+        Debug.Log("Door destroyed");
+        GameEventManager.TestEvent -= OnTest;        
+    }
+    ~DoorController()
+    {
+        Debug.Log("Door destructor");
     }
 }

@@ -27,7 +27,6 @@ public class PlayerController : MonoBehaviour
 
     private bool canAttack = true;
 
-    private float m_LastMouseX;
     private int _pid=0;
     public int Pid
     {
@@ -41,7 +40,6 @@ public class PlayerController : MonoBehaviour
             Debug.Log("Get New Pid :" + _pid);
         }
     }
-    private bool _hpChanged = false;
     private int _hp = 0;
     public int HP
     {
@@ -52,11 +50,19 @@ public class PlayerController : MonoBehaviour
         set
         {
             _hp = value;
-            _hpChanged = true;
+            var uiController = GetComponent<PlayerInformationUIController>();
+            if (uiController != null)
+            {
+                Debug.Log("Hp :" + this._hp);
+                uiController.hpBar.value = this._hp / 1000f;
+            }
+            else
+            {
+                Debug.LogError("UiController is null");
+            }
         }
     }
     private string _playerName;
-    private bool _playerNameChanged = false;
     public string PlayerName
     {
         get
@@ -66,10 +72,17 @@ public class PlayerController : MonoBehaviour
         set
         {
             this._playerName = value;
-            _playerNameChanged = true;
+            var uiController = GetComponent<PlayerInformationUIController>();
+            if (uiController != null)
+            {
+                uiController.textName.text = _playerName;
+            }
+            else
+            {
+                Debug.Log("UiController is null");
+            }
         }
     }
-    public event Action<Vector4> OnPlayerMove;
 
     void MoveAction()
     {
@@ -127,15 +140,15 @@ public class PlayerController : MonoBehaviour
         v.Z = rgbody.velocity.z;
         fire.P = p;
         fire.V = v;
-        NetManager.Instance.SendMessage(NetManager.Protocol.GAME_MSG_SKILL_FIRE,fire);
+        NetworkController.Instance.SendMessage(NetworkController.Protocol.GAME_MSG_SKILL_FIRE,fire);
     }
     // Start is called before the first frame update
     void Start()
     {
         //关注NetMgr的一些网络事件
-        NetManager.OnLogon += OnLogon;
-        NetManager.OnMove += OnMove;
-        NetManager.OnSkillContact += OnSkillContact;
+        GameEventManager.OnLogon += OnLogon;
+        GameEventManager.OnMove += OnMove;
+        GameEventManager.OnSkillContact += OnSkillContact;
     }
 
     private void OnSkillContact(SkillContact contact)
@@ -177,36 +190,6 @@ public class PlayerController : MonoBehaviour
             //还有旋转的角度,单纯的做Y轴的旋转
             this.transform.rotation = Quaternion.Euler(0, InitPos.w, 0);
             _initPosState = 2;
-        }
-        if(_playerNameChanged)
-        {
-            //如果不是在主线程里边去操作UI,会出一些问题
-            //获取脚本PlayerInformationUIController脚本的对象,对Text UI控件进行赋值
-            var uiController = GetComponent<PlayerInformationUIController>();
-            if(uiController!=null)
-            {
-                uiController.textName.text = _playerName;
-                _playerNameChanged = false;
-            }
-            else
-            {
-                Debug.Log("UiController is null");
-            }
-        }
-        if(_hpChanged)
-        {
-            _hpChanged = false;
-            var uiController = GetComponent<PlayerInformationUIController>();
-            if (uiController != null)
-            {
-                Debug.Log("Hp :" + this._hp);
-                uiController.hpBar.value = this._hp/1000f;
-                _playerNameChanged = false;
-            }
-            else
-            {
-                Debug.Log("UiController is null");
-            }
         }
         MoveAction();
         MouseEvent();
@@ -258,7 +241,7 @@ public class PlayerController : MonoBehaviour
         pos.Z = this.transform.position.z;
         pos.V = this.transform.localEulerAngles.y; //当前玩家的面朝方向应该获取欧拉角度的y轴旋转角度
         pos.BloodValue = this.HP;
-        NetManager.Instance.SendMessage(3,pos);
+        NetworkController.Instance.SendMessage(3,pos);
     }
     private void OnDestroy()
     {

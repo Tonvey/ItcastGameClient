@@ -25,18 +25,6 @@ public class SocketClient
     public bool LogIO = true;
     //是否连接服务器成功的标志位
     public static bool loggedIn = false;
-    private bool _pause = false;
-    public bool Pause
-    {
-        set
-        {
-            _pause = value;
-        }
-        get
-        {
-            return _pause;
-        }
-    }
 
     private string mIp;
     private int mPort;
@@ -223,11 +211,6 @@ public class SocketClient
         //根据协议来进行判断
         while(lastbuff!=null&&lastbuff.Length>=8)
         {
-            while(_pause)
-            {
-                Debug.Log("SockClient Pause and sleep");
-                Thread.Sleep(1);
-            }
             //前4个字节是主体数据的长度
             int packetLen = ReadInt32(lastbuff, 0);
             //中间4个字节是消息的id

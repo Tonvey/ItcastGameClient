@@ -12,7 +12,6 @@ public class SceneController : MonoBehaviour
     public static SceneController CurrentSceneController = null;
     public bool PlayerCanAttack = false;
     public int SceneID;
-    private int frameCount = 10;
     virtual protected void Awake()
     {
         Debug.Log("SceneController awake");
@@ -22,9 +21,9 @@ public class SceneController : MonoBehaviour
     {
         Debug.Log("SceneController start");
         CurrentSceneController = this;
-        NetManager.OnNewPlayers += OnNewPlayers;
-        NetManager.OnNewPlayer += OnNewPlayer;
-        NetManager.OnLogon += OnLogon;
+        GameEventManager.OnNewPlayers += OnNewPlayers;
+        GameEventManager.OnNewPlayer += OnNewPlayer;
+        GameEventManager.OnLogon += OnLogon;
     }
     private void OnLogon(int pid, string name)
     {
@@ -36,92 +35,50 @@ public class SceneController : MonoBehaviour
     // Update is called once per frame
     virtual protected void Update()
     {
-        try
-        {
-            //if (frameCount > 0)
-            //{
-            //    Debug.Log("SceneController Skip frame");
-            //    frameCount--;
-            //    return;
-            //}
-            if (NewPlayerList.Count > 0)
-            {
-                lock (NewPlayerList)
-                {
-                    Debug.Log("Before create new player , player count : " + NewPlayerList.Count);
-                    foreach (var o in NewPlayerList)
-                    {
-                        Debug.Log(string.Format("New Player id : {0} , name : {1} , {2}", o.Pid, o.Username, o.P));
-                        if (PlayerList.Contains(o.Pid))
-                        {
-                            Debug.Log(string.Format("New Player id : {0} , name : {1} , {2}  exists", o.Pid, o.Username, o.P));
-                            continue;
-                        }
-                        var bc = o;
-                        this.AddPlayerToList(bc.Pid);
-                        GameObject newPlayerGameObject = Instantiate(Resources.Load<GameObject>("16_2"));
-                        var aiController = newPlayerGameObject.GetComponent<AIController>();
-                        aiController.InitPlayer(bc.Pid, bc.Username, bc.P.X, bc.P.Y, bc.P.Z, bc.P.V, bc.P.BloodValue);
-                        aiController.OnUserDestroy += OnUserDestroy;
-                    }
-                    NewPlayerList.Clear();
-                }
-            }
-
-        }
-        catch (Exception e)
-        {
-            Debug.LogError(e);
-        }
+    }
+    private void AddOnePlayerToScene(Player player)
+    {
+        GameObject newPlayerGameObject = Instantiate(Resources.Load<GameObject>("16_2"));
+        var aiController = newPlayerGameObject.GetComponent<AIController>();
+        aiController.InitPlayer(player.Pid, player.Username, player.P.X, player.P.Y, player.P.Z, player.P.V, player.P.BloodValue);
+        aiController.OnUserDestroy += OnUserDestroy;
     }
     private void OnNewPlayers(List<Player> l)
     {
-        Debug.LogFormat("class : {0}  , OnNewPlayers", this.GetType().ToString());
-        //要在主线程取创建一个玩家对象
-        lock (NewPlayerList)
+        foreach (var player in l)
         {
-            foreach (var player in l)
+            if (PlayerList.Contains(player.Pid))
             {
-                Pb.BroadCast bc = new Pb.BroadCast();
-                bc.Username = player.Username;
-                bc.Pid = player.Pid;
-                bc.P = player.P;
-                NewPlayerList.Add(bc);
+                Debug.LogFormat("Scene contains player {0} {1}", player.Pid, player.Username);
+            }
+            else
+            {
+                AddOnePlayerToScene(player);
             }
         }
     }
     public void AddPlayerToList(int pid)
     {
-        lock (this.PlayerList)
+        if (!PlayerList.Contains(pid))
         {
-            if (!PlayerList.Contains(pid))
-            {
-                this.PlayerList.Add(pid);
-            }
+            this.PlayerList.Add(pid);
         }
     }
     public void RemovePlayerFromList(int pid)
     {
-        lock (this.PlayerList)
-        {
-            this.PlayerList.Remove(pid);
-        }
+        this.PlayerList.Remove(pid);
     }
 
     private void OnNewPlayer(BroadCast bc)
     {
-        //要在主线程取创建一个玩家对象
-        lock (NewPlayerList)
-        {
-            NewPlayerList.Add(bc);
-        }
+        Player player = new Player();
+        player.P = bc.P;
+        player.Pid = bc.Pid;
+        player.Username = bc.Username;
     }
     private void OnUserDestroy(int playerId)
     {
         //将当前用户的pid从列表中清除
-        lock (this.PlayerList)
-        {
-            this.PlayerList.Remove(playerId);
-        }
+        this.PlayerList.Remove(playerId);
     }
 }

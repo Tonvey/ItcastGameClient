@@ -71,10 +71,10 @@ public class AIController : MonoBehaviour
     void Start()
     {
         Debug.Log("AiController start");
-        NetManager.OnMove += OnMove;//监听玩家移动的事件 
-        NetManager.OnOver += OnOver;//监听玩家离线的事件
-        NetManager.OnSkillTrigger += OnSkillTrigger;
-        NetManager.OnSkillContact += OnSkillContact;
+        GameEventManager.OnMove += OnMove;//监听玩家移动的事件 
+        GameEventManager.OnOver += OnOver;//监听玩家离线的事件
+        GameEventManager.OnSkillTrigger += OnSkillTrigger;
+        GameEventManager.OnSkillContact += OnSkillContact;
         aiCharaterController = this.GetComponent<CharacterController>();
         animator = this.GetComponent<Animator>();
     }

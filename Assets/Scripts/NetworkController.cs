@@ -4,7 +4,7 @@ using UnityEngine;
 using System;
 using Pb;
 
-public class NetManager
+public class NetworkController
 {
     public enum Protocol
     {
@@ -23,33 +23,25 @@ public class NetManager
         GAME_MSG_FIRE_HIT = 205,
         GAME_MSG_CHANGE_WORLD_R = 206,
     }
+    public class ProtocolMessage
+    {
+        public int MessageId;
+        public byte[] MessageData;
+        public ProtocolMessage(int id ,byte []data)
+        {
+            MessageId = id;
+            MessageData = data;
+        }
+    }
 
-    //玩家获取pid的事件
-    public static Action<int,string> OnLogon;
-
-    //当有新的玩家创建的时候的事件
-    public static Action<Pb.BroadCast> OnNewPlayer;
-    public static Action<List<Pb.Player>> OnNewPlayers;
-
-    //move ,玩家移动的事件
-    public static Action<Pb.BroadCast> OnMove;
-    //leave ,玩家离开的事件
-    public static Action<int> OnOver;
-    //name ,玩家更新名字的事件
-    public static Action<string> OnName;
-    //bloodvalue
-    public static Action<int> OnBlood;
-    public static Action<ChangeWorldResponse> OnChangeWorldResponse;
-    public static Action<SkillTrigger> OnSkillTrigger;
-    public static Action<SkillContact> OnSkillContact;
-    private static NetManager _instance;
-    public static NetManager Instance
+    private static NetworkController _instance;
+    public static NetworkController Instance
     {
         get
         {
             if (_instance == null)
             {
-                _instance = new NetManager();
+                _instance = new NetworkController();
             }
             return _instance;
         }
@@ -59,9 +51,24 @@ public class NetManager
     {
         get
         {
+            if(_client==null)
+            {
+                _client = new SocketClient();
+                _client.OnNewProtocolMessage += this.OnNewProtocolMessage;
+            }
             return _client;
         }
     }
+
+    private Queue<ProtocolMessage> messageQueue = new Queue<ProtocolMessage>();
+
+    public bool PauseProcMessage
+    {
+        set;
+        get;
+    }
+
+
     public void ConnectToServer(string ip , int port)
     {
         Client.ConnectToServer(ip, port);
@@ -76,29 +83,37 @@ public class NetManager
         SendMessage((int)messageId, req);
     }
 
-    private void Awake()
-    {
-    }
-    // Start is called before the first frame update
-    private NetManager()
-    {
-        _client = new SocketClient();
-        _client.OnNewProtocolMessage += this.NetLogic;
-    }
-
-    // Update is called once per frame
-    void Update()
-    {
-        
-    }
-
     internal void Disconnect()
     {
         Client.Disconnect();
     }
 
-    private void NetLogic(int messageId, byte[] packetData)
+    private void OnNewProtocolMessage(int id, byte[] data)
     {
+        lock(messageQueue)
+        {
+            messageQueue.Enqueue(new ProtocolMessage(id, data));
+        }
+    }
+
+    //call this function in main thread
+    public void ProcessMessages()
+    {
+        if (PauseProcMessage)
+        {
+            Debug.Log("ProcessMessages pause in this frame");
+            return;
+        }
+        if (messageQueue.Count == 0)
+            return;
+        int messageId;
+        byte[] packetData;
+        lock (messageQueue)
+        {
+            var msg = messageQueue.Dequeue();
+            messageId = msg.MessageId;
+            packetData = msg.MessageData;
+        }
         Protocol protocolId = (Protocol)messageId;
         Debug.Log("New Message : " + messageId);
         switch (protocolId)
@@ -106,7 +121,7 @@ public class NetManager
             case Protocol.GAME_MSG_LOGON_SYNCPID://syncpid 玩家出生同步pid和姓名
                 {
                     SyncPid sync = SyncPid.Parser.ParseFrom(packetData);
-                    NetManager.OnLogon(sync.Pid,sync.Username);
+                    GameEventManager.OnLogon(sync.Pid,sync.Username);
                     //将自己存到List里边
                     break;
                 }
@@ -126,36 +141,23 @@ public class NetManager
                     }
                     else if (bc.Tp == 2)
                     {
-                        //bool playerExists = false;
-                        //判断当前传进来的玩家的移动信息是一个新的玩家,还是一个已经存在于当前场景的一个玩家
-                        //lock (GameController.PlayerList)
-                        //{
-                        //    playerExists = GameController.PlayerList.Contains(bc.Pid);
-                        //    if (!playerExists)
-                        //    {
-                        //        //考虑将玩家创建到场景中
-                        //        NetManager.OnNewPlayer(bc);
-                        //        //将当前玩家添加到list里边
-                        //        GameController.PlayerList.Add(bc.Pid);
-                        //    }
-                        //}
                         //新的位置消息
-                        NetManager.OnNewPlayer(bc);
-                        NetManager.OnMove(bc);
+                        GameEventManager.OnNewPlayer(bc);
+                        GameEventManager.OnMove(bc);
                     }
                     if (bc.Tp == 4)//tp 为4,表明玩家在移动
                     {
-                        NetManager.OnMove(bc);
+                        GameEventManager.OnMove(bc);
                     }
                     break;
                 }
             case Protocol.GAME_MSG_LOGOFF_SYNCPID:
                 {
                     SyncPid sync = SyncPid.Parser.ParseFrom(packetData);
-                    if(NetManager.OnOver!=null)
+                    if(GameEventManager.OnOver!=null)
                     {
                         Debug.Log("net manager OnOver trigger : " + sync.Pid);
-                        NetManager.OnOver(sync.Pid);
+                        GameEventManager.OnOver(sync.Pid);
                     }
                     break;
                 }
@@ -168,7 +170,7 @@ public class NetManager
                     {
                         lPlayers.Add(player);
                     }
-                    OnNewPlayers(lPlayers);
+                    GameEventManager.OnNewPlayers(lPlayers);
                     //lock (GameController.PlayerList)
                     //{
                     //    //将玩家都全部添加玩家列表进来
@@ -191,27 +193,27 @@ public class NetManager
                 {
                     var res = ChangeWorldResponse.Parser.ParseFrom(packetData);
                     Debug.Log("ChangWorld response : " + res.ChangeRes);
-                    if(OnChangeWorldResponse!=null)
+                    if(GameEventManager.OnChangeWorldResponse !=null)
                     {
-                        OnChangeWorldResponse(res);
+                        GameEventManager.OnChangeWorldResponse(res);
                     }
                     break;
                 }
             case Protocol.GAME_MSG_SKILL_BROAD:
                 {
                     var res = SkillTrigger.Parser.ParseFrom(packetData);
-                    if(OnChangeWorldResponse!=null)
+                    if(GameEventManager.OnChangeWorldResponse !=null)
                     {
-                        OnSkillTrigger(res);
+                        GameEventManager.OnSkillTrigger(res);
                     }
                     break;
                 }
             case Protocol.GAME_MSG_FIRE_HIT:
                 {
                     var res = SkillContact.Parser.ParseFrom(packetData);
-                    if (OnSkillContact != null)
+                    if (GameEventManager.OnSkillContact != null)
                     {
-                        OnSkillContact(res);
+                        GameEventManager.OnSkillContact(res);
                     }
                     break;
                 }

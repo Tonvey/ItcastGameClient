@@ -26,7 +26,7 @@ public class TalkCenter : MonoBehaviour
     private string mContent = "";
     //是否有信息发出的标志位，true表示有
     private bool CanTalk = true;
-    private NetManager netMgr;
+    private NetworkController netMgr;
     //队列容器
     private Queue mContents = new Queue();
     // Use this for initialization
