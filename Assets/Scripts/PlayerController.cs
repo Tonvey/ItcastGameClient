@@ -111,6 +111,7 @@ public class PlayerController : MonoBehaviour
         {
             canAttack = true;
         })));
+        this.transform.eulerAngles = new Vector3(transform.localEulerAngles.x, Camera.main.transform.localEulerAngles.y, transform.localEulerAngles.z);
         this.playerAnimator.SetTrigger("Attack");
         Vector3 pos = this.transform.position + this.transform.up + this.transform.forward*3.5f;
         var bulletObj = Instantiate(bolt, pos, this.bolt.transform.rotation);
