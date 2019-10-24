@@ -26,6 +26,7 @@ public class PlayerController : MonoBehaviour
     private Vector4 InitPos;
 
     private bool canAttack = true;
+    private bool canMove = true;
 
     private int _pid=0;
     public int Pid
@@ -150,6 +151,12 @@ public class PlayerController : MonoBehaviour
         GameEventManager.OnLogon += OnLogon;
         GameEventManager.OnMove += OnMove;
         GameEventManager.OnSkillContact += OnSkillContact;
+        GameEventManager.OnChatting += OnChatting;
+    }
+
+    private void OnChatting(bool isChatting)
+    {
+        this.canMove = !isChatting;
     }
 
     private void OnSkillContact(SkillContact contact)
@@ -192,8 +199,11 @@ public class PlayerController : MonoBehaviour
             this.transform.rotation = Quaternion.Euler(0, InitPos.w, 0);
             _initPosState = 2;
         }
-        MoveAction();
-        MouseEvent();
+        if(canMove)
+        {
+            MoveAction();
+            MouseEvent();
+        }
     }
 
     private void MouseEvent()
@@ -249,5 +259,6 @@ public class PlayerController : MonoBehaviour
         GameEventManager.OnLogon -= OnLogon;
         GameEventManager.OnMove -= OnMove;
         GameEventManager.OnSkillContact -= OnSkillContact;
+        GameEventManager.OnChatting -= OnChatting;
     }
 }

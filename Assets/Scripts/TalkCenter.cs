@@ -18,8 +18,6 @@ public class TalkCenter : MonoBehaviour
     public static string Content;
     //谁发送过来的信息
     public static string PlayerName;
-    //是否在输入信息
-    public static bool Talking = false;
     //显示内容的最大条数
     public int ContentSize = 10;
     //显示的内容
@@ -85,11 +83,11 @@ public class TalkCenter : MonoBehaviour
     //进行输入不能进行移动等操作
     public void SetTalking()//属性视图中调用
     {
-        Talking = true;
+        GameEventManager.OnChatting(true);
     }
     //解除相应阻截
     public void SetNotTalking()//属性视图中调用
     {
-        Talking = false;
+        GameEventManager.OnChatting(false);
     }
 }
