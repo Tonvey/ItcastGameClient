@@ -216,7 +216,7 @@ public class NetworkController
             Debug.Log("ProcessMessages pause in this frame");
             return;
         }
-        while (messageQueue.Count != 0)
+        while (messageQueue.Count != 0 && !PauseProcMessage)
         {
             Debug.Log("Process message , deltaTime : " + Time.deltaTime);
             int messageId;
