@@ -26,7 +26,6 @@ public class TalkCenter : MonoBehaviour
     private string mContent = "";
     //是否有信息发出的标志位，true表示有
     private bool CanTalk = true;
-    private NetworkController netMgr;
     //队列容器
     private Queue mContents = new Queue();
     // Use this for initialization
@@ -80,7 +79,7 @@ public class TalkCenter : MonoBehaviour
         Talk talk = new Talk();
         //获取输入框的内容
         talk.Content = mInputField.text;
-        netMgr.SendMessage(2, talk);
+        NetworkController.Instance.SendMessage(NetworkController.Protocol.GAME_MSG_TALK_CONTENT, talk);
         CanTalk = false;
     }
     //进行输入不能进行移动等操作
