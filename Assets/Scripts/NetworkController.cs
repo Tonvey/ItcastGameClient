@@ -188,7 +188,7 @@ public class NetworkController
             case Protocol.GAME_MSG_SKILL_BROAD:
                 {
                     var res = SkillTrigger.Parser.ParseFrom(packetData);
-                    if (GameEventManager.OnChangeWorldResponse != null)
+                    if (GameEventManager.OnSkillTrigger != null)
                     {
                         GameEventManager.OnSkillTrigger(res);
                     }
