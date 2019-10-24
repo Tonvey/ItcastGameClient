@@ -38,6 +38,12 @@ public class SceneController : MonoBehaviour
     }
     private void AddOnePlayerToScene(Player player)
     {
+        if(PlayerList.Contains(player.Pid))
+        {
+            Debug.LogFormat("Player exists {0} {1}", player.Pid, player.Username);
+            return;
+        }
+        AddPlayerToList(player.Pid);
         GameObject newPlayerGameObject = Instantiate(Resources.Load<GameObject>("16_2"));
         var aiController = newPlayerGameObject.GetComponent<AIController>();
         aiController.InitPlayer(player.Pid, player.Username, player.P.X, player.P.Y, player.P.Z, player.P.V, player.P.BloodValue);
@@ -47,14 +53,7 @@ public class SceneController : MonoBehaviour
     {
         foreach (var player in l)
         {
-            if (PlayerList.Contains(player.Pid))
-            {
-                Debug.LogFormat("Scene contains player {0} {1}", player.Pid, player.Username);
-            }
-            else
-            {
-                AddOnePlayerToScene(player);
-            }
+            AddOnePlayerToScene(player);
         }
     }
     public void AddPlayerToList(int pid)
@@ -75,6 +74,7 @@ public class SceneController : MonoBehaviour
         player.P = bc.P;
         player.Pid = bc.Pid;
         player.Username = bc.Username;
+        this.AddOnePlayerToScene(player);
     }
     private void OnUserDestroy(int playerId)
     {

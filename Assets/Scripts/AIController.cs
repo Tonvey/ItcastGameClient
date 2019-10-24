@@ -6,15 +6,17 @@ using UnityEngine;
 
 public class AIController : MonoBehaviour
 {
+    private Queue<Action> actionsNextFrame = new Queue<Action>();
+    public event Action<int> OnUserDestroy;
     //当前角色的移动速度
     public float speed = 5.0f;
     public int Pid;
     private CharacterController aiCharaterController;
-    private string _playerName;
-    private bool _playerNameChanged = false;
     private Animator animator;
     public GameObject bolt;
     public float boltSpeed = 1f;
+    private string _playerName;
+    private bool _playerNameChanged = false;
     public string PlayerName
     {
         get
@@ -24,25 +26,23 @@ public class AIController : MonoBehaviour
         set
         {
             this._playerName = value;
-            _playerNameChanged = true;
+            this.actionsNextFrame.Enqueue(() =>
+            {
+                //_playerNameChanged = true;
+                var uiController = GetComponent<PlayerInformationUIController>();
+                if (uiController != null)
+                {
+                    uiController.textName.text = _playerName;
+                }
+                else
+                {
+                    Debug.Log("UiController is null");
+                }
+            });
         }
     }
-    private bool _newPosChanged = false;
-    private Vector4 _newPos;
-    public Vector4 NewPos
-    {
-        get
-        {
-            return _newPos;
-        }
-        set
-        {
-            _newPos = value;
-            _newPosChanged = true;
-        }
-    }
-    private bool _hpChanged = false;
     private int _hp = 0;
+    private bool _hpChanged = false;
     public int HP
     {
         get
@@ -52,11 +52,22 @@ public class AIController : MonoBehaviour
         set
         {
             _hp = value;
-            _hpChanged = true;
+            //_hpChanged = true;
+            this.actionsNextFrame.Enqueue(() =>
+            {
+                var uiController = GetComponent<PlayerInformationUIController>();
+                if (uiController != null)
+                {
+                    Debug.Log("Hp :" + this._hp);
+                    uiController.hpBar.value = this._hp / 1000f;
+                }
+                else
+                {
+                    Debug.Log("UiController is null");
+                }
+            });
         }
     }
-    //是否要干掉当前对象的布尔值
-    private bool bOver = false;
     internal void InitPlayer(int pid, string username, float x, float y, float z, float v,int hp)
     {
         Debug.Log("AiController init");
@@ -66,7 +77,6 @@ public class AIController : MonoBehaviour
         this.transform.rotation = Quaternion.Euler(0,v,0);
         this.HP = hp;
     }
-    private SkillTrigger trigger = null;
     // Start is called before the first frame update
     void Start()
     {
@@ -87,17 +97,11 @@ public class AIController : MonoBehaviour
             this.HP = contact.ContactPos.BloodValue;
         }
     }
-
-    public event Action<int> OnUserDestroy;
-
     private void OnOver(int _pid)
     {
         Debug.Log("AiController OnOver");
-        //回到主ui线程里边去干掉当前对象
-        if(this.Pid == _pid)
-        {
-            bOver = true;
-        }
+        //干掉当前玩家
+        Destroy(this.gameObject);
     }
     private void OnSkillTrigger(SkillTrigger trigger)
     {
@@ -105,20 +109,43 @@ public class AIController : MonoBehaviour
         {
             return;
 		}
-        this.trigger = trigger;
+        this.animator.SetTrigger("Attack");
+        Vector3 pos = this.transform.position + this.transform.up + this.transform.forward * 3.5f;
+        var bulletObj = Instantiate(bolt, pos, this.bolt.transform.rotation);
+        bulletObj.transform.rotation = Quaternion.AngleAxis(90, this.transform.right) * this.transform.rotation;
+        var bc = bulletObj.GetComponent<BoltContoller>();
+        bc.BornPos = pos;
+        bc.PlayerId = this.Pid;
+        bc.BulletId = trigger.BulletId;
+        bc.SkillId = trigger.SkillId;
+        var rgbody = bulletObj.GetComponent<Rigidbody>();
+        rgbody.velocity = new Vector3(trigger.V.X, trigger.V.Y, trigger.V.Z);
     }
 
     private void OnMove(BroadCast bc)
     {
         if(bc.Pid == this.Pid)
         {
-            //当前玩家在移动
-            this.NewPos = new Vector4(bc.P.X, bc.P.Y, bc.P.Z, bc.P.V);
             this.HP = bc.P.BloodValue;
+            //坐标改变了
+            this.transform.rotation = Quaternion.Euler(0, bc.P.V, 0);
+            //先判断一下目的地离当前位置的距离,如果很大,那么就使用协程每一帧都自动生成一个平滑的移动
+            Vector3 destPos = new Vector3(bc.P.X, bc.P.Y, bc.P.Z);
+            if (Vector3.Distance(this.transform.position, destPos) > 0.3f)
+            {
+                //每次启动协程之前先停止一下上一次的协程
+                StopCoroutine(MoveLogic(destPos));
+                StartCoroutine(MoveLogic(destPos));
+            }
+            else
+            {
+                //如果距离太短,那就直接闪现过去
+                this.transform.position = destPos;
+            }
         }
     }
 
-    IEnumerator MoveLogic()
+    IEnumerator MoveLogic(Vector3 _newPos)
     {
         //只要协程启动,每一帧都会迭代一下
         Vector3 destPos = new Vector3(_newPos.x, _newPos.y, _newPos.z);
@@ -136,74 +163,10 @@ public class AIController : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        if(this._newPosChanged)
+        while(actionsNextFrame.Count>0)
         {
-            //坐标改变了
-            this.transform.rotation = Quaternion.Euler(0, NewPos.w, 0);
-            //先判断一下目的地离当前位置的距离,如果很大,那么就使用协程每一帧都自动生成一个平滑的移动
-            Vector3 destPos = new Vector3(_newPos.x, _newPos.y, _newPos.z);
-            if (Vector3.Distance(this.transform.position, destPos)>0.3f)
-            {
-                //每次启动协程之前先停止一下上一次的协程
-                StopCoroutine(MoveLogic());
-                StartCoroutine(MoveLogic());
-            }
-            else
-            {
-                //如果距离太短,那就直接闪现过去
-                this.transform.position = new Vector3(NewPos.x, NewPos.y, NewPos.z);
-            }
-            _newPosChanged = false;
-        }
-        if(_playerNameChanged)
-        {
-            //如果不是在主线程里边去操作UI,会出一些问题
-            //获取脚本PlayerInformationUIController脚本的对象,对Text UI控件进行赋值
-            var uiController = GetComponent<PlayerInformationUIController>();
-            if(uiController!=null)
-            {
-                uiController.textName.text = _playerName;
-                _playerNameChanged = false;
-            }
-            else
-            {
-                Debug.Log("UiController is null");
-            }
-        }
-        if (_hpChanged)
-        {
-            _hpChanged = false;
-            var uiController = GetComponent<PlayerInformationUIController>();
-            if (uiController != null)
-            {
-                Debug.Log("Hp :" + this._hp);
-                uiController.hpBar.value = this._hp / 1000f;
-                _playerNameChanged = false;
-            }
-            else
-            {
-                Debug.Log("UiController is null");
-            }
-        }
-        if(trigger!=null)
-        {
-            this.animator.SetTrigger("Attack");
-            Vector3 pos = this.transform.position + this.transform.up + this.transform.forward * 3.5f;
-            var bulletObj = Instantiate(bolt, pos, this.bolt.transform.rotation);
-            bulletObj.transform.rotation = Quaternion.AngleAxis(90, this.transform.right) * this.transform.rotation;
-            var bc = bulletObj.GetComponent<BoltContoller>();
-            bc.BornPos = pos;
-            bc.PlayerId = this.Pid;
-            bc.BulletId = trigger.BulletId;
-            bc.SkillId = trigger.SkillId;
-            var rgbody = bulletObj.GetComponent<Rigidbody>();
-            rgbody.velocity = new Vector3(trigger.V.X, trigger.V.Y, trigger.V.Z);
-            trigger = null;
-        }
-        if (bOver)
-        {
-            //干掉当前玩家
-            Destroy(this.gameObject);
+            var act = actionsNextFrame.Dequeue();
+            act();
         }
     }
     private void OnDestroy()

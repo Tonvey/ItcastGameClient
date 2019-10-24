@@ -72,6 +72,7 @@ public class SocketClient
 
     internal void Disconnect()
     {
+        Debug.Log("SockClient disconnect");
         if(this.client.Connected)
         {
             this.Close();

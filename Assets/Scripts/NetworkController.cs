@@ -27,7 +27,7 @@ public class NetworkController
     {
         public int MessageId;
         public byte[] MessageData;
-        public ProtocolMessage(int id ,byte []data)
+        public ProtocolMessage(int id, byte[] data)
         {
             MessageId = id;
             MessageData = data;
@@ -51,7 +51,7 @@ public class NetworkController
     {
         get
         {
-            if(_client==null)
+            if (_client == null)
             {
                 _client = new SocketClient();
                 _client.OnNewProtocolMessage += this.OnNewProtocolMessage;
@@ -69,11 +69,11 @@ public class NetworkController
     }
 
 
-    public void ConnectToServer(string ip , int port)
+    public void ConnectToServer(string ip, int port)
     {
         Client.ConnectToServer(ip, port);
     }
-    public void SendMessage(int id ,Google.Protobuf.IMessage message)
+    public void SendMessage(int id, Google.Protobuf.IMessage message)
     {
         Client.SendMessage(id, message);
     }
@@ -85,35 +85,21 @@ public class NetworkController
 
     internal void Disconnect()
     {
+        Debug.Log("NetworkController disconnect");
         Client.Disconnect();
     }
 
     private void OnNewProtocolMessage(int id, byte[] data)
     {
-        lock(messageQueue)
+        lock (messageQueue)
         {
             messageQueue.Enqueue(new ProtocolMessage(id, data));
         }
     }
 
-    //call this function in main thread
-    public void ProcessMessages()
+
+    private void MessageDispatch(int messageId, byte[] packetData)
     {
-        if (PauseProcMessage)
-        {
-            Debug.Log("ProcessMessages pause in this frame");
-            return;
-        }
-        if (messageQueue.Count == 0)
-            return;
-        int messageId;
-        byte[] packetData;
-        lock (messageQueue)
-        {
-            var msg = messageQueue.Dequeue();
-            messageId = msg.MessageId;
-            packetData = msg.MessageData;
-        }
         Protocol protocolId = (Protocol)messageId;
         Debug.Log("New Message : " + messageId);
         switch (protocolId)
@@ -121,7 +107,7 @@ public class NetworkController
             case Protocol.GAME_MSG_LOGON_SYNCPID://syncpid 玩家出生同步pid和姓名
                 {
                     SyncPid sync = SyncPid.Parser.ParseFrom(packetData);
-                    GameEventManager.OnLogon(sync.Pid,sync.Username);
+                    GameEventManager.OnLogon(sync.Pid, sync.Username);
                     //将自己存到List里边
                     break;
                 }
@@ -154,7 +140,7 @@ public class NetworkController
             case Protocol.GAME_MSG_LOGOFF_SYNCPID:
                 {
                     SyncPid sync = SyncPid.Parser.ParseFrom(packetData);
-                    if(GameEventManager.OnOver!=null)
+                    if (GameEventManager.OnOver != null)
                     {
                         Debug.Log("net manager OnOver trigger : " + sync.Pid);
                         GameEventManager.OnOver(sync.Pid);
@@ -166,7 +152,7 @@ public class NetworkController
                     //刚开始上线的时候获取周围玩家的列表
                     SyncPlayers players = SyncPlayers.Parser.ParseFrom(packetData);
                     List<Pb.Player> lPlayers = new List<Pb.Player>();
-                    foreach(var player in players.Ps)
+                    foreach (var player in players.Ps)
                     {
                         lPlayers.Add(player);
                     }
@@ -193,7 +179,7 @@ public class NetworkController
                 {
                     var res = ChangeWorldResponse.Parser.ParseFrom(packetData);
                     Debug.Log("ChangWorld response : " + res.ChangeRes);
-                    if(GameEventManager.OnChangeWorldResponse !=null)
+                    if (GameEventManager.OnChangeWorldResponse != null)
                     {
                         GameEventManager.OnChangeWorldResponse(res);
                     }
@@ -202,7 +188,7 @@ public class NetworkController
             case Protocol.GAME_MSG_SKILL_BROAD:
                 {
                     var res = SkillTrigger.Parser.ParseFrom(packetData);
-                    if(GameEventManager.OnChangeWorldResponse !=null)
+                    if (GameEventManager.OnChangeWorldResponse != null)
                     {
                         GameEventManager.OnSkillTrigger(res);
                     }
@@ -219,6 +205,29 @@ public class NetworkController
                 }
             default:
                 break;
+        }
+    }
+
+    //call this function in main thread
+    public void ProcessMessages()
+    {
+        if (PauseProcMessage)
+        {
+            Debug.Log("ProcessMessages pause in this frame");
+            return;
+        }
+        while (messageQueue.Count != 0)
+        {
+            Debug.Log("Process message , deltaTime : " + Time.deltaTime);
+            int messageId;
+            byte[] packetData;
+            lock (messageQueue)
+            {
+                var msg = messageQueue.Dequeue();
+                messageId = msg.MessageId;
+                packetData = msg.MessageData;
+            }
+            MessageDispatch(messageId, packetData);
         }
     }
 }

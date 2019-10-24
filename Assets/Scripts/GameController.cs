@@ -128,4 +128,8 @@ public class GameController
     {
         NetworkController.Instance.Disconnect();
     }
+    ~GameController()
+    { 
+        NetworkController.Instance.Disconnect();
+    }
 }
