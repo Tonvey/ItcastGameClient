@@ -81,4 +81,10 @@ public class SceneController : MonoBehaviour
         //将当前用户的pid从列表中清除
         this.PlayerList.Remove(playerId);
     }
+    private void OnDestroy()
+    {
+        GameEventManager.OnNewPlayers -= OnNewPlayers;
+        GameEventManager.OnNewPlayer -= OnNewPlayer;
+        GameEventManager.OnLogon -= OnLogon;
+    }
 }

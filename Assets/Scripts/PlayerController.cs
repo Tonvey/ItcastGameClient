@@ -245,6 +245,8 @@ public class PlayerController : MonoBehaviour
     }
     private void OnDestroy()
     {
-
+        GameEventManager.OnLogon -= OnLogon;
+        GameEventManager.OnMove -= OnMove;
+        GameEventManager.OnSkillContact -= OnSkillContact;
     }
 }

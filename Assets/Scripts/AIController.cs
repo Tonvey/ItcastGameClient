@@ -100,8 +100,7 @@ public class AIController : MonoBehaviour
     private void OnOver(int _pid)
     {
         Debug.Log("AiController OnOver");
-        //干掉当前玩家
-        Destroy(this.gameObject);
+        actionsNextFrame.Enqueue(() => Destroy(this.gameObject));
     }
     private void OnSkillTrigger(SkillTrigger trigger)
     {
@@ -174,5 +173,9 @@ public class AIController : MonoBehaviour
         Debug.Log("AiController OnDestroy");
         if(OnUserDestroy!=null)
             OnUserDestroy(Pid);
+        GameEventManager.OnMove -= OnMove;//监听玩家移动的事件 
+        GameEventManager.OnOver -= OnOver;//监听玩家离线的事件
+        GameEventManager.OnSkillTrigger -= OnSkillTrigger;
+        GameEventManager.OnSkillContact -= OnSkillContact;
     }
 }

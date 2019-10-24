@@ -117,7 +117,7 @@ public class GameController
                     pc.Pid = this.PlayerID;
                     pc.PlayerName = this.PlayerName;
                     var sc = GameObject.Find("SceneController");
-                    var bsc = sc.GetComponent<BattleSceneController>();
+                    var bsc = sc.GetComponent<SceneController>();
                     bsc.AddPlayerToList(this.PlayerID);
                     NetworkController.Instance.PauseProcMessage = false;
                 };
