@@ -657,9 +657,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 72fc99ece68534966a44d2d698e7547d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  PlayerList: 
   PlayerCanAttack: 1
   SceneID: 2
-  PlayerList: 
 --- !u!4 &1337269311
 Transform:
   m_ObjectHideFlags: 0
@@ -1144,7 +1144,7 @@ MonoBehaviour:
   followOffsetX: 0
   followOffsetY: 1.5
   followOffsetZ: 0
-  horizontalSpeed: 1
-  verticalSpeed: 1
+  horizontalSpeed: 2
+  verticalSpeed: 2
   reverseVertical: 1
   MaxVerticalViewAngle: 80

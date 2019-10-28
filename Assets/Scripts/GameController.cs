@@ -11,7 +11,6 @@ public class GameController
     public ushort ServerPort = 0;
     public int PlayerID;
     public string PlayerName;
-    public bool ParseCMD = false;
     private CmdHelper mCmdHelper = new CmdHelper();
     private Action NextFrameAction = null;
     private Position InitP;
@@ -29,6 +28,10 @@ public class GameController
         }
     }
 
+    internal void FixedUpdate()
+    {
+    }
+
     // Start is called before the first frame update
     public void Start()
     {
@@ -37,12 +40,11 @@ public class GameController
             Debug.Log("GameController start");
             GameEventManager.OnLogon += OnLogon;
             GameEventManager.OnChangeWorldResponse += OnChangeWorldResponse;
-            if (ParseCMD)
-            {
-                mCmdHelper.ParseCMDArgs();
-                this.ServerIP = mCmdHelper.ServerIP;
-                this.ServerPort = ushort.Parse(mCmdHelper.ServerPort);
-            }
+            mCmdHelper.ServerIP = this.ServerIP;
+            mCmdHelper.ServerPort = this.ServerPort.ToString();
+            mCmdHelper.ParseCMDArgs();
+            this.ServerIP = mCmdHelper.ServerIP;
+            this.ServerPort = ushort.Parse(mCmdHelper.ServerPort);
             NetworkController.Instance.ConnectToServer(this.ServerIP, this.ServerPort);
             hasInit = true;
         }

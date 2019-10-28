@@ -19,8 +19,11 @@ public class GameControllerDelegate : MonoBehaviour
     {
         GameController.Instance.Update();        
     }
+    private void FixedUpdate()
+    {
+        GameController.Instance.FixedUpdate();
+    }
     private void OnDestroy()
     {
-        //GameController.Instance.OnDestroy();
     }
 }
