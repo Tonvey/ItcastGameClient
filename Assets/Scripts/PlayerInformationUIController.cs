@@ -19,6 +19,8 @@ public class PlayerInformationUIController : MonoBehaviour
     public float hpBarOffsetX = 0f;
     public float hpBarOffsetY = 2.5f;
     public float standardDistance = 5.4f;
+    public float maxScale = 2.0f;
+    public float minScale = 0.2f;
 
     private void OnDestroy()
     {
@@ -89,13 +91,13 @@ public class PlayerInformationUIController : MonoBehaviour
         Vector3 hpBarScreePos = mainCamera.WorldToScreenPoint(
             new Vector3(transform.position.x + hpBarOffsetX, transform.position.y + hpBarOffsetY, transform.position.z)
             );
-        float scale = 1f; ;
+        float scale = 1f;
         if (nameTextScreePos.z > 0f)
         {
             //表示在摄像机前方
             float distance = Vector3.Distance(mainCamera.transform.position, transform.position);
             //做保护,distance可能会等于0
-            if (distance == 0f)
+            if (distance <= 0.01f)
             {
                 scale = 1f; 
             }
@@ -104,13 +106,13 @@ public class PlayerInformationUIController : MonoBehaviour
                 scale = standardDistance / distance;
             }
             //控制一下大小不能太大,也不能太小
-            if (scale > 1.0f)
+            if (scale > maxScale)
             {
-                scale = 1.0f;
+                scale = maxScale;
             }
-            if (scale < 0.2f)
+            if (scale < minScale)
             {
-                scale = 0.2f;
+                scale = minScale;
             }
         }
         else
