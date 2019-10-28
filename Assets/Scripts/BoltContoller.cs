@@ -40,16 +40,21 @@ public class BoltContoller : MonoBehaviour
         //Debug.Log(collision.rigidbody.gameObject.tag);
         if(collision.collider.tag=="Player")
         {
-        }
-        else if(collision.collider.tag=="Bound")
-        {
-            Destroy(this.gameObject);
+            var pc = collision.collider.GetComponent<PlayerController>();
+            if(PlayerId==pc.Pid)
+            {
+                return;
+            }
         }
         else if(collision.collider.tag=="OtherPlayer")
         {
             var ai = collision.collider.GetComponent<AIController>();
             if (ai != null)
             {
+                if(ai.Pid==this.PlayerId)
+                {
+                    return;
+                }
                 Pb.SkillContact contact = new Pb.SkillContact();
                 contact.BulletId = this.BulletId;
                 contact.SkillId = this.SkillId;
@@ -66,7 +71,7 @@ public class BoltContoller : MonoBehaviour
             {
                 Debug.Log("Can not get other player script");
             }
-            Destroy(this.gameObject);
         }
+        Destroy(this.gameObject);
     }
 }
