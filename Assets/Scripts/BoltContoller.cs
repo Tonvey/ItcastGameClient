@@ -65,7 +65,7 @@ public class BoltContoller : MonoBehaviour
                 contacPos.Y = collision.contacts[0].point.y;
                 contacPos.Z = collision.contacts[0].point.z;
                 contact.ContactPos = contacPos;
-                NetworkController.Instance.SendMessage(NetworkController.Protocol.GAME_MSG_SEE_HIT, contact);
+                NetworkController.Instance.SendMessage(NetworkController.Protocol.GAME_MSG_SKILL_CONTACT, contact);
             }
             else
             {

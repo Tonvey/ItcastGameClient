@@ -142,7 +142,7 @@ public class PlayerController : MonoBehaviour
         v.Z = rgbody.velocity.z;
         fire.P = p;
         fire.V = v;
-        NetworkController.Instance.SendMessage(NetworkController.Protocol.GAME_MSG_SKILL_FIRE,fire);
+        NetworkController.Instance.SendMessage(NetworkController.Protocol.GAME_MSG_SKILL_TRIGGER,fire);
     }
     // Start is called before the first frame update
     void Start()

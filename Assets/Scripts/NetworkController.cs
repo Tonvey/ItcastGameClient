@@ -12,16 +12,16 @@ public class NetworkController
         GAME_MSG_TALK_CONTENT = 2,
         GAME_MSG_NEW_POSTION = 3,
 
-        GAME_MSG_SKILL_FIRE = 4,
-        GAME_MSG_SEE_HIT = 5,
+        GAME_MSG_SKILL_TRIGGER = 4,
+        GAME_MSG_SKILL_CONTACT = 5,
         GAME_MSG_CHANGE_WORLD = 6,
 
         GAME_MSG_BROADCAST = 200,
         GAME_MSG_LOGOFF_SYNCPID = 201,
         GAME_MSG_SUR_PLAYER = 202,
         GAME_MSG_SKILL_BROAD = 204,
-        GAME_MSG_FIRE_HIT = 205,
-        GAME_MSG_CHANGE_WORLD_R = 206,
+        GAME_MSG_SKILL_CONTACT_BROAD = 205,
+        GAME_MSG_CHANGE_WORLD_RESPONSE = 206,
     }
     public class ProtocolMessage
     {
@@ -173,7 +173,7 @@ public class NetworkController
                     //}
                     break;
                 }
-            case Protocol.GAME_MSG_CHANGE_WORLD_R:
+            case Protocol.GAME_MSG_CHANGE_WORLD_RESPONSE:
                 {
                     var res = ChangeWorldResponse.Parser.ParseFrom(packetData);
                     Debug.Log("ChangWorld response : " + res.ChangeRes);
@@ -192,7 +192,7 @@ public class NetworkController
                     }
                     break;
                 }
-            case Protocol.GAME_MSG_FIRE_HIT:
+            case Protocol.GAME_MSG_SKILL_CONTACT_BROAD:
                 {
                     var res = SkillContact.Parser.ParseFrom(packetData);
                     if (GameEventManager.OnSkillContact != null)
