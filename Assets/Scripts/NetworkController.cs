@@ -119,9 +119,7 @@ public class NetworkController
                         //聊天消息
                         if (bc.Content != null)
                         {
-                            TalkCenter.Content = bc.Content;
-                            TalkCenter.PlayerName = bc.Username;
-                            TalkCenter.TalkFlag = true;
+                            GameEventManager.OnNewChatMessage(bc.Pid, bc.Username, bc.Content);
                         }
 
                     }

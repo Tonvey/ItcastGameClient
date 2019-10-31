@@ -14,6 +14,9 @@ public class GameEventManager : MonoBehaviour
     public static Action<Pb.BroadCast> OnNewPlayer;
     public static Action<List<Pb.Player>> OnNewPlayers;
 
+    //有新的聊天信息
+    public static Action<int, string, string> OnNewChatMessage;
+
     public static Action<bool> OnChatting;
 
     //move ,玩家移动的事件
