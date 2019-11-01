@@ -7,9 +7,9 @@ using UnityEngine.UI;
 public class PlayerInformationUIController : MonoBehaviour
 {
     //该类用于控制UI的显示
-    public GameObject textNameGameObject;
+    private GameObject textNameGameObject;
     public Text textName;
-    public GameObject hpBarGameObject;
+    private GameObject hpBarGameObject;
     public Slider hpBar;
     private GameObject sceneCanvas;//场景的画布
     private Camera mainCamera;

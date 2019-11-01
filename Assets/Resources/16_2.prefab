@@ -182,7 +182,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   speed: 2
   Pid: 0
-  bolt: {fileID: 2323615197467802610, guid: 41de0158558534aee91ca20ead97cbd2, type: 3}
+  bolt: {fileID: 7972480228304665098, guid: 64f89b0e4e18d404ab23b49a3a00d063, type: 3}
   boltSpeed: 1
 --- !u!114 &5098634978475204205
 MonoBehaviour:
@@ -209,15 +209,16 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3d37029d28375d1408960375d3b0ef84, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  textNameGameObject: {fileID: 0}
-  textName: {fileID: 0}
-  hpBarGameObject: {fileID: 0}
-  hpBar: {fileID: 0}
+  textName: {fileID: 4701712834518579997, guid: c4d60d5c0f917d14a986cb42ada19d0b,
+    type: 3}
+  hpBar: {fileID: 8652880335609145335, guid: 9d2970354e5a2ff449275adddba25bde, type: 3}
   textNameOffsetX: 0
   textNameOffsetY: 3
   hpBarOffsetX: 0
   hpBarOffsetY: 2.5
   standardDistance: 5.4
+  maxScale: 2
+  minScale: 0.2
 --- !u!1 &5098761964623517024
 GameObject:
   m_ObjectHideFlags: 0

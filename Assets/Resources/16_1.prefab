@@ -1002,7 +1002,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   playerAnimator: {fileID: 9006882643871989106}
-  bolt: {fileID: 2323615197467802610, guid: 41de0158558534aee91ca20ead97cbd2, type: 3}
+  bolt: {fileID: 7972480228304665098, guid: 64f89b0e4e18d404ab23b49a3a00d063, type: 3}
   boltSpeed: 100
   speed: 5
   playerCharacterConctl: {fileID: 8958622600185021612}
@@ -1029,6 +1029,8 @@ MonoBehaviour:
   hpBarOffsetX: 0
   hpBarOffsetY: 2.5
   standardDistance: 5.4
+  maxScale: 2
+  minScale: 0.2
 --- !u!114 &9056565174582672127
 MonoBehaviour:
   m_ObjectHideFlags: 0
