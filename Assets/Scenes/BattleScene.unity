@@ -1242,6 +1242,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   follow: {fileID: 418428678}
+  MouseViewControlUseAxes: 1
   followDistance: 4.5
   followOffsetX: 0
   followOffsetY: 1.5

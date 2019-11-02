@@ -615,6 +615,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   follow: {fileID: 1000010772252957}
+  MouseViewControlUseAxes: 1
   followDistance: 4.5
   followOffsetX: 0
   followOffsetY: 1.5
@@ -980,7 +981,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   mTalkText: {fileID: 1637617656}
   mInputField: {fileID: 33329972}
-  ContentSize: 10
+  MaxDisplayMessageCount: 10
 --- !u!1 &1637617654
 GameObject:
   m_ObjectHideFlags: 0
