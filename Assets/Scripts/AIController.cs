@@ -100,7 +100,10 @@ public class AIController : MonoBehaviour
     private void OnOver(int _pid)
     {
         Debug.Log("AiController OnOver");
-        actionsNextFrame.Enqueue(() => Destroy(this.gameObject));
+        if(_pid==this.Pid)
+        {
+            actionsNextFrame.Enqueue(() => Destroy(this.gameObject));
+        }
     }
     private void OnSkillTrigger(SkillTrigger trigger)
     {
