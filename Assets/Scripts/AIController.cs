@@ -16,6 +16,8 @@ public class AIController : MonoBehaviour
     public GameObject bolt;
     public float boltSpeed = 1f;
     private string _playerName;
+    private Coroutine movingCoroutine = null;
+    private Vector3 mTargetPos = Vector3.zero;
     private bool _playerNameChanged = false;
     public string PlayerName
     {
@@ -132,35 +134,31 @@ public class AIController : MonoBehaviour
             //坐标改变了
             this.transform.rotation = Quaternion.Euler(0, bc.P.V, 0);
             //先判断一下目的地离当前位置的距离,如果很大,那么就使用协程每一帧都自动生成一个平滑的移动
-            Vector3 destPos = new Vector3(bc.P.X, bc.P.Y, bc.P.Z);
-            if (Vector3.Distance(this.transform.position, destPos) > 0.3f)
-            {
-                //每次启动协程之前先停止一下上一次的协程
-                StopCoroutine(MoveLogic(destPos));
-                StartCoroutine(MoveLogic(destPos));
+            mTargetPos = new Vector3(bc.P.X, bc.P.Y, bc.P.Z);
+            //每次启动协程之前先停止一下上一次的协程
+            if(this.movingCoroutine!=null)
+            { 
+                StopCoroutine(movingCoroutine);
             }
-            else
-            {
-                //如果距离太短,那就直接闪现过去
-                this.transform.position = destPos;
-            }
+            this.movingCoroutine = StartCoroutine(MoveLogic());
         }
     }
 
-    IEnumerator MoveLogic(Vector3 _newPos)
+    IEnumerator MoveLogic()
     {
         //只要协程启动,每一帧都会迭代一下
-        Vector3 destPos = new Vector3(_newPos.x, _newPos.y, _newPos.z);
-        while (Vector3.Distance(this.transform.position, destPos)>0.3f)
+        while (Vector3.Distance(this.transform.position, mTargetPos)>0.1f)
         {
             //处理移动一点点距离
             //计算速度向量
-            Vector3 dirVector = destPos - this.transform.position;
+            Vector3 dirVector = mTargetPos - this.transform.position;
             //获取方向向量的单位向量,然后乘以速度,就可以得到一个速度的向量
             Vector3 speedVect = dirVector.normalized * this.speed;
             aiCharaterController.SimpleMove(speedVect);
             yield return 0; 
         }
+        this.transform.position = mTargetPos;
+        this.movingCoroutine = null;
     }
     // Update is called once per frame
     void Update()
