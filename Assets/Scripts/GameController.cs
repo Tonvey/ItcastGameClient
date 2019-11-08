@@ -16,6 +16,28 @@ public class GameController
     private Position InitP;
     private static GameController _instance = null;
     private bool hasInit = false;
+    private bool _isLockMouse;
+    public bool LockMouse
+    { 
+        set
+        {
+            if(value)
+            {
+                Cursor.lockState = CursorLockMode.Locked;
+                Cursor.visible = false;
+            }
+            else
+            {
+                Cursor.lockState = CursorLockMode.None;
+                Cursor.visible = true;
+            }
+            _isLockMouse = value;
+		}
+        get
+        {
+            return _isLockMouse;
+		}
+    }
     public static GameController Instance
     {
         get
@@ -46,6 +68,8 @@ public class GameController
             this.ServerIP = mCmdHelper.ServerIP;
             this.ServerPort = ushort.Parse(mCmdHelper.ServerPort);
             NetworkController.Instance.ConnectToServer(this.ServerIP, this.ServerPort);
+            //鼠标锁定
+            LockMouse = true;
             hasInit = true;
         }
     }
@@ -88,6 +112,10 @@ public class GameController
             bc.Username = this.PlayerName;
             bc.Tp = 2;
             GameEventManager.OnMove(bc);
+        }
+        if(Input.GetKeyDown(KeyCode.Tab))
+        {
+            LockMouse = !LockMouse;
         }
     }
 
