@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using Pb;
 using UnityEngine;
 using System.IO;
-public class PlayerController : MonoBehaviour
+public class PlayerController : Role
 {
     private static int BoltId = 1;
     public Animator playerAnimator; // 角色骨骼动画
@@ -28,62 +28,6 @@ public class PlayerController : MonoBehaviour
     private bool canAttack = true;
     private bool canMove = true;
 
-    private int _pid=0;
-    public int Pid
-    {
-        get
-        {
-            return _pid;
-        }
-        set
-        {
-            _pid = value;
-            Debug.Log("Get New Pid :" + _pid);
-        }
-    }
-    private int _hp = 0;
-    public int HP
-    {
-        get
-        {
-            return _hp;
-        }
-        set
-        {
-            _hp = value;
-            var uiController = GetComponent<PlayerInformationUIController>();
-            if (uiController != null)
-            {
-                Debug.Log("Hp :" + this._hp);
-                uiController.hpBar.value = this._hp / 1000f;
-            }
-            else
-            {
-                Debug.LogError("UiController is null");
-            }
-        }
-    }
-    private string _playerName;
-    public string PlayerName
-    {
-        get
-        {
-            return _playerName;
-        }
-        set
-        {
-            this._playerName = value;
-            var uiController = GetComponent<PlayerInformationUIController>();
-            if (uiController != null)
-            {
-                uiController.textName.text = _playerName;
-            }
-            else
-            {
-                Debug.Log("UiController is null");
-            }
-        }
-    }
 
     void MoveAction()
     {
@@ -145,8 +89,9 @@ public class PlayerController : MonoBehaviour
         NetworkController.Instance.SendMessage(NetworkController.Protocol.GAME_MSG_SKILL_TRIGGER,fire);
     }
     // Start is called before the first frame update
-    void Start()
+    public override void Start()
     {
+        base.Start();
         //关注NetMgr的一些网络事件
         GameEventManager.OnLogon += OnLogon;
         GameEventManager.OnMove += OnMove;
@@ -188,8 +133,9 @@ public class PlayerController : MonoBehaviour
     }
 
     // Update is called once per frame
-    void Update()
+    public override void Update()
     {
+        base.Update();
         if(_initPosState==1)//表示已经获取出生点,但是未同步到模型上
         {
             //已经获取了初始化位置

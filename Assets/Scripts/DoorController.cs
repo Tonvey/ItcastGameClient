@@ -10,13 +10,8 @@ public class DoorController : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        GameEventManager.TestEvent += OnTest; 
     }
 
-    private void OnTest()
-    {
-        Debug.Log("OnTest");
-    }
 
     // Update is called once per frame
     void Update()
@@ -44,7 +39,6 @@ public class DoorController : MonoBehaviour
     private void OnDestroy()
     {
         Debug.Log("Door destroyed");
-        GameEventManager.TestEvent -= OnTest;        
     }
     ~DoorController()
     {

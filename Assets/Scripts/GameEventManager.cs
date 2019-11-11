@@ -6,7 +6,6 @@ using Pb;
 
 public class GameEventManager : MonoBehaviour
 {
-    public static Action TestEvent;
     //玩家获取pid的事件
     public static Action<int, string> OnLogon;
 

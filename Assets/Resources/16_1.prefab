@@ -913,7 +913,6 @@ GameObject:
   - component: {fileID: 8958622600185021612}
   - component: {fileID: 9056565174582672126}
   - component: {fileID: 9056565174582672116}
-  - component: {fileID: 9056565174582672123}
   - component: {fileID: 9056565174582672127}
   m_Layer: 0
   m_Name: 16_1
@@ -1008,29 +1007,6 @@ MonoBehaviour:
   playerCharacterConctl: {fileID: 8958622600185021612}
   roteSpeed: 50
   playerTransform: {fileID: 9052613446556085330}
---- !u!114 &9056565174582672123
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 9055876333648846078}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 3d37029d28375d1408960375d3b0ef84, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  textNameGameObject: {fileID: 0}
-  textName: {fileID: 0}
-  hpBarGameObject: {fileID: 0}
-  hpBar: {fileID: 0}
-  textNameOffsetX: 0
-  textNameOffsetY: 3
-  hpBarOffsetX: 0
-  hpBarOffsetY: 2.5
-  standardDistance: 5.4
-  maxScale: 2
-  minScale: 0.2
 --- !u!114 &9056565174582672127
 MonoBehaviour:
   m_ObjectHideFlags: 0

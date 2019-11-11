@@ -4,13 +4,11 @@ using System.Collections.Generic;
 using Pb;
 using UnityEngine;
 
-public class AIController : MonoBehaviour
+public class AIController : Role
 {
-    private Queue<Action> actionsNextFrame = new Queue<Action>();
     public event Action<int> OnUserDestroy;
     //当前角色的移动速度
     public float speed = 5.0f;
-    public int Pid;
     private CharacterController aiCharaterController;
     private Animator animator;
     public GameObject bolt;
@@ -19,57 +17,6 @@ public class AIController : MonoBehaviour
     private Coroutine movingCoroutine = null;
     private Vector3 mTargetPos = Vector3.zero;
     private bool _playerNameChanged = false;
-    public string PlayerName
-    {
-        get
-        {
-            return _playerName;
-        }
-        set
-        {
-            this._playerName = value;
-            this.actionsNextFrame.Enqueue(() =>
-            {
-                //_playerNameChanged = true;
-                var uiController = GetComponent<PlayerInformationUIController>();
-                if (uiController != null)
-                {
-                    uiController.textName.text = _playerName;
-                }
-                else
-                {
-                    Debug.Log("UiController is null");
-                }
-            });
-        }
-    }
-    private int _hp = 0;
-    private bool _hpChanged = false;
-    public int HP
-    {
-        get
-        {
-            return _hp;
-        }
-        set
-        {
-            _hp = value;
-            //_hpChanged = true;
-            this.actionsNextFrame.Enqueue(() =>
-            {
-                var uiController = GetComponent<PlayerInformationUIController>();
-                if (uiController != null)
-                {
-                    Debug.Log("Hp :" + this._hp);
-                    uiController.hpBar.value = this._hp / 1000f;
-                }
-                else
-                {
-                    Debug.Log("UiController is null");
-                }
-            });
-        }
-    }
     internal void InitPlayer(int pid, string username, float x, float y, float z, float v,int hp)
     {
         Debug.Log("AiController init");
@@ -80,8 +27,9 @@ public class AIController : MonoBehaviour
         this.HP = hp;
     }
     // Start is called before the first frame update
-    void Start()
+    public override void Start()
     {
+        base.Start();
         Debug.Log("AiController start");
         GameEventManager.OnMove += OnMove;//监听玩家移动的事件 
         GameEventManager.OnOver += OnOver;//监听玩家离线的事件
@@ -161,13 +109,9 @@ public class AIController : MonoBehaviour
         this.movingCoroutine = null;
     }
     // Update is called once per frame
-    void Update()
+    public override void Update()
     {
-        while(actionsNextFrame.Count>0)
-        {
-            var act = actionsNextFrame.Dequeue();
-            act();
-        }
+        base.Update();
     }
     private void OnDestroy()
     {

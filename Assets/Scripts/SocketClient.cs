@@ -112,6 +112,10 @@ public class SocketClient
             Debug.Log("socket client not been connected");
         }
     }
+    ~SocketClient()
+    {
+        this.Close();
+    }
 
     private void OnWrite(IAsyncResult ar)
     {

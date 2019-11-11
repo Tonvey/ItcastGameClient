@@ -9,7 +9,5 @@ public class BattleSceneController : SceneController
     protected override void Update()
     {
         base.Update();
-        if(GameEventManager.TestEvent!=null)
-            GameEventManager.TestEvent();
     }
 }
