@@ -155,22 +155,6 @@ public class NetworkController
                         lPlayers.Add(player);
                     }
                     GameEventManager.OnNewPlayers(lPlayers);
-                    //lock (GameController.PlayerList)
-                    //{
-                    //    //将玩家都全部添加玩家列表进来
-                    //    foreach (var player in players.Ps)
-                    //    {
-                    //        if (!GameController.PlayerList.Contains(player.Pid))
-                    //        {
-                    //            GameController.PlayerList.Add(player.Pid);
-                    //            BroadCast bc = new BroadCast();
-                    //            bc.Pid = player.Pid;
-                    //            bc.P = player.P;
-                    //            bc.Username = player.Username;
-                    //            NetManager.OnNewPlayer(bc);
-                    //        }
-                    //    }
-                    //}
                     break;
                 }
             case Protocol.GAME_MSG_CHANGE_WORLD_RESPONSE:

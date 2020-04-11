@@ -5,9 +5,10 @@ using UnityEngine;
 public class PlayerAnimation : MonoBehaviour
 {
     private Animator playerAnimator; // 角色骨骼动画
+    //上次的位置信息
+    public Vector3 m_LastPostion;
     private float m_AnimatorSpeed;
     private float m_AnimatorDirection;
-    public Vector3 m_LastPostion;
 
     // Start is called before the first frame update
     void Start()

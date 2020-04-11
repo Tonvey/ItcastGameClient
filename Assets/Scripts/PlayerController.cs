@@ -6,25 +6,31 @@ using UnityEngine;
 using System.IO;
 public class PlayerController : Role
 {
+    //子弹，ID 递增
     private static int BoltId = 1;
-    public Animator playerAnimator; // 角色骨骼动画
+    //角色动画控制器
+    public Animator playerAnimator;
+    //子弹对象
     public GameObject bolt;
+    //子弹速度
     public float boltSpeed = 1f;
+    //角色移动速度
     public float speed; //运动速度
-    public CharacterController playerCharacterConctl; //动画控制器
-    public float roteSpeed;//旋转速度
-    //装载机器人本身的位置角度大小等信息
-    public Transform playerTransform;
-    //储存机器人移动的距离
-    private Vector3 m_CurrentMovement;
+    //角色控制器
+    public CharacterController playerCharacterConctl; 
 
+    //距离上次同步位置的时间差
     private float _lastSyncPositionTimeSpec=0f;
+    //上次同步的位置
     private Vector4 _lastSyncPosition = Vector4.zero;
+
     //是否已经获取出生点位置,0表示未获取,1表示已经获取但是未同步到模型上,2表示已经同步到模型上
     private int _initPosState = 0 ;
+
     //四元组存储 玩家的xyz坐标以及面向的角度
     private Vector4 InitPos;
 
+    //能否攻击以及移动的开关
     private bool canAttack = true;
     private bool canMove = true;
 

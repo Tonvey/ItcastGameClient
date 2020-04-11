@@ -96,7 +96,7 @@ LightmapSettings:
     m_PVRFilteringAtrousPositionSigmaAO: 1
     m_ExportTrainingData: 0
     m_TrainingDataDestination: TrainingData
-  m_LightingDataAsset: {fileID: 112000000, guid: bd2e1ba9b8c1b494fbd71848718254de,
+  m_LightingDataAsset: {fileID: 112000000, guid: 21ae747983103439fb578bb94313b9ed,
     type: 2}
   m_UseShadowmask: 1
 --- !u!196 &4
@@ -615,7 +615,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   follow: {fileID: 1000010772252957}
-  MouseViewControlUseAxes: 1
   followDistance: 4.5
   followOffsetX: 0
   followOffsetY: 1.5

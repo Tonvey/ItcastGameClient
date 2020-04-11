@@ -4,9 +4,8 @@ using UnityEngine;
 
 public class PlayerCameraController : MonoBehaviour
 {
-    public GameObject follow;  //摄像机跟随的对象,在视图上赋值了
-
-    public bool MouseViewControlUseAxes = true;
+    //跟随目标
+    public GameObject follow; 
     public float followDistance=4.5f;
     public float followOffsetX = 0.0f;
     public float followOffsetY = 1.5f;
@@ -14,7 +13,9 @@ public class PlayerCameraController : MonoBehaviour
 
     public float horizontalSpeed = 1.0f;
     public float verticalSpeed = 1.0f;
+    //是否垂直方向反转
     public bool reverseVertical = true;
+    //最大可视角度
     public float MaxVerticalViewAngle = 80f;
 
     private float angleHorizontal = 0.0f;
@@ -31,25 +32,8 @@ public class PlayerCameraController : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-
-    }
-
-    private void LateUpdate()
-    {
-        float h,v;
-        if(MouseViewControlUseAxes)
-        {
-            h = horizontalSpeed * Input.GetAxis("Mouse X");
-            v = verticalSpeed * Input.GetAxis("Mouse Y");
-        }
-        else
-        {
-            Vector3 diff = Input.mousePosition - mLastMousePosition;
-            mLastMousePosition = Input.mousePosition;
-            h = diff.x * horizontalSpeed * 0.1f;
-            v = diff.y * verticalSpeed * 0.1f;
-        }
-        //Debug.Log("Get h : " + h + " v : " + v);
+        float h = horizontalSpeed * Input.GetAxis("Mouse X");
+        float v = verticalSpeed * Input.GetAxis("Mouse Y");
         angleHorizontal += h;
         if(reverseVertical)
         {
@@ -67,8 +51,6 @@ public class PlayerCameraController : MonoBehaviour
         {
             angleVertical = MaxVerticalViewAngle;
         }
-        //Debug.Log("angleVertical:" + angleVertical);
-
         transform.rotation = Quaternion.Euler(new Vector3(angleVertical, angleHorizontal, 0));
 
         this.transform.position = follow.transform.position + new Vector3(followOffsetX,followOffsetY,followOffsetZ) - transform.forward * followDistance;
